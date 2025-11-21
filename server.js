@@ -1,23 +1,25 @@
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
 
 function endsWith(str, suffix) {
-    return new RegExp(suffix + '$').test(str);
+    return str.endsWith(suffix);
 };
 
 http.createServer(function (request, response) {
     console.log('request ', request.url);
-    var filePath = '.' + request.url;
+    var parsedUrl = url.parse(request.url);
+    var filePath = '.' + parsedUrl.pathname;
     if (filePath == './') {
-        filePath = 'login/index.html';
+        filePath = path.join('login', 'index.html');
     }
-    var str = request.url;
-    if (endsWith(str, '/')) {
-            console.log('url modificada');
-            if(filePath != 'login/index.html'){
-                filePath = filePath+'index.html';
-            };
+
+    if (endsWith(parsedUrl.pathname, '/')) {
+        console.log('url modificada');
+        if(filePath != path.join('login', 'index.html')) {
+            filePath = path.join(filePath, 'index.html');
+        }
     }
 
     var extname = String(path.extname(filePath)).toLowerCase();
@@ -32,7 +34,7 @@ http.createServer(function (request, response) {
         '.svg': 'image/svg+xml',
         '.wav': 'audio/wav',
         '.mp4': 'video/mp4',
-        '.woff': 'application/font-woffddd',
+        '.woff': 'application/font-woff',
         '.woff2': 'application/font-woff2',
         '.ttf': 'application/font-ttf',
         '.eot': 'application/vnd.ms-fontobject',
@@ -49,17 +51,16 @@ http.createServer(function (request, response) {
                     response.writeHead(404, { 'Content-Type': 'text/html' });
                     response.end(content, 'utf-8');
                 });
-            }
-            else {
+            } else {
                 response.writeHead(500);
-                response.end('Sorry, check with the site admin for error: '+error+' ..\n');
+                response.end('Sorry, check with the site admin for error: ' + error + ' ..\n');
             }
-        }
-        else {
+        } else {
             response.writeHead(200, { 'Content-Type': contentType });
             response.end(content, 'utf-8');
         }
     });
 
-}).listen(3000);
-console.log('Server running at http://127.0.0.1:3000/');
+}).listen(3001);
+
+console.log('Server running at http://127.0.0.1:3001/');
